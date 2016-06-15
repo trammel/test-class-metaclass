@@ -1,8 +1,8 @@
-# NAME
+### NAME
 
 	Test::Class::MetaClass
 
-# DESCRIPTION
+### DESCRIPTION
 
 	Test::Class::MetaClass can be used for constructing Test::Class classes
 	via composition of granular, re-usable Sets of unit tests, unit test
@@ -57,7 +57,7 @@
 	test structure and re-use, which takes away time and focus from
 	creating and maintaining the Classes/Packages being tested.
 
-# BUT WHY?!?
+### BUT WHY?!?
 
 	Test::Class::MetaClass de-couples a given Class' unit tests from that 1
 	named Class, making them available for re-use where appropriate e.g. by
@@ -88,7 +88,7 @@
 
 		sub foo : Tests { .. } = regular subroutine, easily overridden
 
-# INSPIRATION
+### INSPIRATION
 
 	Traits
 
@@ -104,11 +104,11 @@
 
 		https://metacpan.org/pod/Test::Class
 
-# COPYRIGHT
+### COPYRIGHT
 
 	Copyright (C) Resonance Labs, 2015-2016
 	Niall Young <niall@iinet.net.au>
 
-# LICENSE
+### LICENSE
 
 	This work is licensed under a Creative Commons Attribution-ShareAlike 4.0 International License.
