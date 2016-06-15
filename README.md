@@ -1,104 +1,114 @@
-Test::Class::MetaClass
+# NAME
 
-Test::Class::MetaClass enables simple de-coupling of a Class' Unit Tests from 1 Static Class.
-This enables re-use of all Unit Tests, by all of the Class' SubClasses, Consumers or any
-context in which the Class or Package's symbols are consumed, imported or executed.
+	Test::Class::MetaClass
 
-Unit Tests orthogonal to Inheritance.  This enables testability of, and compliance to,
-Liskov Substitutability.  It also enables fine-grained, predictable, and safe composition and
-re-use of Test::Class based Unit Tests.
+# DESCRIPTION
 
-Each Test::Class::MetaClass can be thought of as a Set of Unit Tests, which can be safely and
-predictably combined with 1..N other Sets of Unit Tests, where each Set is-a Test::Class::MetaClass
+	Test::Class::MetaClass can be used for constructing Test::Class classes
+	via composition of granular, re-usable Sets of unit tests, unit test
+	Fixtures etc.
 
-All Test::Class methods (startup, setup, test, teardown and shutdown) are executed with 1 of 3
-distinct levels of execution predictability, safety, and non/overridability:
+	A static Test::Class approach can result in a number of costs:
 
-	1. "Guaranteed to Execute", by way of symbol randomization (difficult to override)
-	2. "Probably Executes", but predictable symbol (moderately safe but overridable)
-	3. "May Not Execute", an easily overridable sub : Test { } Test::Class test subroutine
+		1. Unit tests, fixtures etc. are not easily re-used where it would
+		   be appropriate to do so (e.g. SubClasses; or other contexts where
+		   that same code is consumed or executed).
 
-HOW TO USE
+		2. Re-use of unit tests can be achieved by building a Test::Class
+		   inheritance hierarchy, but its structure is constrained and
+		   directly coupled to the structure of the Classes/Packages being
+		   tested (e.g. inheritance hierarchy or explicit order-of-consumption
+		   in lib/).
 
-	package Class::Test::MetaClass;
-	use base 'Test::Class::MetaClass';
+		3. Ordinary subroutine declarations (in a Class/Package or its
+		   Test::Class) can easily (and often silently) be overridden,
+		   accidentally or otherwise!
 
-	INIT {
-		# protected Test::Class::MetaClass test declarations
-	}
+	Test::Class::MetaClass exists to directly prevent and resolve these
+	issues, by providing Test::Class method declarative wrappers which are
+	called from INIT { } at run-time:
 
-	sub foo : Tests {
-		# ordinary Test::Class test declarations
-	}
+		1. Test::Class::MetaClass::predictable_method_name()
+			* for 'test' methods
 
-	1;
+		2. Test::Class::MetaClass::randomize_method_name()
+			* for 'startup', 'setup', 'teardown' or 'shutdown' methods
 
-1. "Guaranteed to Execute", by way of symbol randomization (difficult to override, not impossible):
+	Both of these Test::Class method declaration helpers ensure that your
+	Test::Class methods are extremely unlikely to conflict with any other
+	methods, and are therefore extremely unlikely to be accidentally
+	disabled or overridden.
 
-	INIT {
+	Any Test::Class methods, or helper/data/paramaterisable methods, can be
+	declared as regular "sub { }" subroutines at compile-time, and
+	therefore be overridden (or disabled) by subsequent subroutine
+	declarations.
 
-		Test::Class::MetaClass::_randomized_method_name(
-			sub {
-				# tests
-			},
-			# test meta
-		);
+	Test::Class::MetaClass therefore ppaarrttiittiioonnss the unit test SuperSet of
+	Test::Class methods, ensuring that each Set is self-contained and
+	therefore each Set of Test::Class methods is more likely to play nicely
+	with others.
 
-	}
+	A traditional Test::Class approach can result in a parallel Test::Class
+	Inheritance Hierarchy, its structure matching (and being constrained
+	by) the existing structure or inheritance hierarchy of the
+	Classes/Packages being tested. This tight coupling creates an
+	unnecessary maintenance burden, and often prevents appropriate unit
+	test structure and re-use, which takes away time and focus from
+	creating and maintaining the Classes/Packages being tested.
 
-2. "Probably Executes", by way of predictable symbol (moderately safe, but overridable):
+# BUT WHY?!?
 
-	INIT {
+	Test::Class::MetaClass de-couples a given Class' unit tests from that 1
+	named Class, making them available for re-use where appropriate e.g. by
+	SubClasses, orthogonal to inheritance, or in other contexts where that
+	Package is consumed and its code is executed.  This means you don't
+	need to repeat, or copy'n'pate, the same tests over and over again -
+	you can re-use the test/fixture/helper and parameterise any data.
 
-		Test::Class::MetaClass::_predictable_method_name(
-			sub {
-				# tests
-			},
-			# test meta
-		);
+	Each Test::Class::MetaClass can be thought of as a Set of unit tests,
+	fixtures, helper methods, mocks etc. which can be safely and
+	predictably combined with 1..N other Sets of unit tests, fixtures,
+	helper methods, mocks etc. - where each Set is-a
+	Test::Class::MetaClass.
 
-	}
+	All Test::Class methods (startup, setup, test, teardown and shutdown)
+	are executed with 1 of 3 explicit levels of execution predictability,
+	safety, and non/overridability:
 
-3. "May Not Execute", easily overridable (regular Test::Class test subroutines)
+	1. "Guaranteed to Execute"
 
-	sub foo : Tests {
-		# tests
-	}
+		randomize_method_name() = randomized symbol, difficult to override
 
-Test::Class::MetaClass therefore Partitions up the total Unit Tests, the SuperSet of Test::Class
-methods, providing predictable and reliable safety where required, enforcing Test::Class fixtures
-and proper dismantling of Test::Class fixtures via startup, setup, teardown and shutdown, or simple
-Test::Class test methods which can easily be overridden by a subsequent Test::Class::MetaClass
-use import.
+	2. "Probably Executes"
 
-A traditional Test::Class approach can result in a parallel Test::Class Inheritance Hierarchy,
-in addition to an existing Inheritance Hierarchy: the Classes or Packages being tested.  Coupling
-directly to the Classes constrains Unit Test Re-Use and created an unnecessary burden of ongoing
-code complexity and maintenance when the underlying Classes or Packages change e.g. the order in
-which packages are imported changes; or their inheritance hierarchy changes; or a Test::Class test
-method is accidentally, mistakenly or silenting overriding another Test::Class test method which
-should not be disabled or overridden. This may be obvious, or it may be non-obvious, hidden or
-simply overlooked.  Maintaining this tightly coupled relationship, between 1 Class and its Unit
-Tests, locks us into a given Inheritance Hierarchy all the more rigidly, and it takes away time
-and focus from creating and maintaining Application Classes and Packages.
+		predictable_method_name() = semi-randomized symbol, more easily overridden)
 
-COPYRIGHT
+	3. "May Not Execute"
 
-	Resonance Labs, 2016
-	Niall Young <niall@iinet.net.au>
+		sub foo : Tests { .. } = regular subroutine, easily overridden
 
-INSPIRATIONS
+# INSPIRATION
+
+	Traits
+
+		"Traits: Composable Unit of Behaviour" by Nathanael Scharli, Stephane Ducasse, Oscar Nierstrasz,
+		and Andrew P. Black.
+
+		Proceedings of European Conference on Object-Oriented Programming (ECOOP'03), LNCS 2743 pp. 248 to 274,
+		Springer Verlag, Berlin Heidelberg, July 2003
+
+		http://scg.unibe.ch/research/traits
 
 	Test::Class
 
 		https://metacpan.org/pod/Test::Class
 
-	Traits
+# COPYRIGHT
 
-		"Traits: Composable Unit of Behaviour" by Nathanael Schärli, Stéphane Ducasse, Oscar Nierstrasz,
-		and Andrew P. Black.
+	Copyright (C) Resonance Labs, 2015-2016
+	Niall Young <niall@iinet.net.au>
 
-		Proceedings of European Conference on Object-Oriented Programming (ECOOP'03), LNCS 2743 p. 248�274,
-		Springer Verlag, Berlin Heidelberg, July 2003
+# LICENSE
 
-		http://scg.unibe.ch/research/traits
+	This work is licensed under a Creative Commons Attribution-ShareAlike 4.0 International License.
