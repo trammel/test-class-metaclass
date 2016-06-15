@@ -44,7 +44,7 @@
 	therefore be overridden (or disabled) by subsequent subroutine
 	declarations.
 
-	Test::Class::MetaClass therefore ppaarrttiittiioonnss the unit test SuperSet of
+	Test::Class::MetaClass therefore partitions the unit test SuperSet of
 	Test::Class methods, ensuring that each Set is self-contained and
 	therefore each Set of Test::Class methods is more likely to play nicely
 	with others.
