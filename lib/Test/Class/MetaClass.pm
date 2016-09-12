@@ -36,7 +36,7 @@ A static Test::Class approach can result in a number of costs:
 
 Test::Class::MetaClass exists to directly prevent and resolve these issues,
 by providing Test::Class method declarative wrappers which are called
-from INIT { } at run-time:
+from INIT { } immediately before run-time:
 
 	1. Test::Class::MetaClass::predictable_method_name()
 		* for 'test' methods
@@ -127,9 +127,9 @@ sub class { die "you must implement class() in a Test::Class and not in a Test::
 
 =head2 I<predictable_method_name()>
 
-Generate a unique, but predictable, method name at run-time, to prevent it
-from being accidentally, overridden. Unlike randomize_method_name(), this
-helper calculates a fairly predictable name across subsequent run-times that
+Generate a unique, but predictable, method name to prevent it from being
+accidentally, overridden. Unlike randomize_method_name(), this helper
+calculates a fairly predictable name across subsequent run-times that
 a human can then use for debugging, or careful and explicit overriding:
 
 	INIT {
@@ -200,7 +200,7 @@ sub predictable_method_name {
 
 =head2 I<randomize_method_name()>
 
-Randomize a unqiue Test::Class method symbol at run-time, to make it hard to
+Randomize a unqiue Test::Class method symbol, to make it hard to
 disable or override the method, accidentally or deliberately:
 
 	INIT {

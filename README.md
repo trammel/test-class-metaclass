@@ -26,7 +26,7 @@
 
 	Test::Class::MetaClass exists to directly prevent and resolve these
 	issues, by providing Test::Class method declarative wrappers which are
-	called from INIT { } at run-time:
+	called from INIT { } immediately before run-time:
 
 		1. Test::Class::MetaClass::predictable_method_name()
 			* for 'test' methods
