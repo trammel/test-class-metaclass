@@ -352,7 +352,7 @@ distinct 'test' methods.
 		Test::Class::MetaClass
 		NameSpace::SuperClass::Tests
 		NameSpace::CommonFixtures
-	);
+	); # note for overloading these are consumed in reverse order from bottom/end to top/start!
 
 	use strict;
 	use warnings;
