@@ -67,15 +67,62 @@ time and focus from creating and maintaining the Classes/Packages being tested.
 
 # declare all of your randomized or predictable Test::Class methods in INIT {}
 INIT {
+	# e.g. see t/lib/Test/Class/MetaClass/Tests.pm
 
-	# use_ok($self->class()
+	# ensure $self->disabled() lives, Test::Class::MetaClass::Tests is the only Class
+	# with an excemption, as disabled() should only be called from within a Test::Class
+	# declaration
 	Test::Class::MetaClass::randomize_method_name(
 		sub {
 			my ($self) = @_;
-			Test::More::use_ok($self->class());
-			return
+			Test::Exception::lives_ok(sub { return Test::Class::MetaClass::disabled() }, '$self->disabled() lives');
+			return;
 		},
-		'startup', 1, 'use_self_class'
+		'startup', 1, 'disabled_lives'
+	);
+
+	# test randomize_method_name() and predictable_method_name() with all Test::Class method types
+	foreach my $type (qw(test startup setup teardown shutdown)) {
+
+		Test::Class::MetaClass::randomize_method_name(
+			sub {
+				my ($self) = @_;
+				Test::Exception::lives_ok(
+					sub {
+						Test::More::ok(1, "Test::Class::MetaClass::randomize_method_name() successfully generates a $type test method");
+						return;
+					},
+					"Test::Class::MetaClass::randomize_method_name(sub {...}, $type, 1) lives"
+				);
+				return;
+			},
+			$type, 2, 'rumba_test_mixin_randomize_method_name_generated_' . $type . '_method'
+		);
+
+		Test::Class::MetaClass::predictable_method_name(
+			sub {
+				my ($self) = @_;
+				Test::Exception::lives_ok(
+					sub {
+						Test::More::ok(1, "Test::Class::MetaClass::predictable_method_name() successfully generates a $type test method");
+						return;
+					},
+					"Test::Class::MetaClass::predictable_method_name(sub {...}, $type, 1) lives"
+				);
+				return;
+			},
+			$type, 2, 'rumba_test_mixin_predictable_method_name_generated_' . $type . '_method'
+		);
+
+	}
+
+	Test::Class::MetaClass::predictable_method_name(
+		sub {
+			my ($self) = @_;
+			Test::More::ok($self->can('randomize_method_name'), "\$self->can('randomise_method_name')");
+			Test::More::ok($self->can('predictable_method_name'), "\$self->can('predictable_method_name')");
+		},
+		'test', 2, 'can__randomize_method_name__and__predictable_method_name'
 	);
 
 	# $self->class() lives
@@ -100,7 +147,7 @@ INIT {
 				}
 			}
 		},
-		'teardown', 0
+		'teardown', 0, 'unmock_helper'
 	);
 
 }
@@ -293,6 +340,12 @@ a single layer (the Test::Class level) to keep them easy to find and manage.
 
 sub disabled {
 
+	return;
+
+	# TODO implement a standard mechanism to ensure this type of method can
+	# only be called at the Class level, and not within a Test::Class::MetaClass
+	# This will keep all customisation of any consumed MetaClass at the Class
+	# layer, so that we don't end up with MetaClass <-> MetaClass inter-dependencies
 	my ($package, $filename, $line) = caller();
 
 	die "disabled() was called by a Test::Class::MetaClass when it should only be called by a Test::Class Class"
